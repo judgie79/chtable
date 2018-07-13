@@ -6,6 +6,7 @@ declare class TablePanelCtrl extends MetricsPanelCtrl {
     private variableSrv;
     static templateUrl: string;
     pageIndex: number;
+    currentFilter: string;
     dataRaw: any;
     table: any;
     renderer: any;
@@ -15,6 +16,7 @@ declare class TablePanelCtrl extends MetricsPanelCtrl {
         targets: {}[];
         transform: string;
         pageSize: number;
+        filterableColumns: any;
         limit: any;
         showHeader: boolean;
         styles: ({
@@ -46,15 +48,23 @@ declare class TablePanelCtrl extends MetricsPanelCtrl {
     onInitPanelActions(actions: any): void;
     issueQueries(datasource: any): any;
     _rowsCount(): any;
-    _rmLimit(query: string, raw: any): string;
+    _rmLimit(query: any, raw: any): any;
+    _rmOffset(query: any, raw: any): any;
+    _rmOrder(query: any): any;
+    _rmWhere(query: any): string;
+    getLimitStr(): any;
+    getOffsetStr(): number;
+    getOrderStr(orderIndex: any, desc: any): string;
+    getWhereStr(): string;
+    _getColumnFilter(): string;
     _issueQueries(clearCache?: boolean): any;
-    getLimitStr(): string;
     onDataError(err: any): void;
     onDataReceived(dataList: any): void;
     render(): void;
     toggleColumnSort(col: any, colIndex: any): void;
-    loadPage(): void;
+    loadPage(clearCache?: boolean): void;
     exportCsv(): void;
+    search(): void;
     link(scope: any, elem: any, attrs: any, ctrl: TablePanelCtrl): void;
 }
 export { TablePanelCtrl, TablePanelCtrl as PanelCtrl };

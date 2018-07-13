@@ -43,6 +43,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         targets: [{}],
                         transform: 'timeseries_to_columns',
                         pageSize: 100,
+                        filterableColumns: null,
                         limit: null,
                         showHeader: true,
                         styles: [
@@ -91,9 +92,6 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     actions.push({ text: 'Export CSV', click: 'ctrl.exportCsv()' });
                 };
                 TablePanelCtrl.prototype.issueQueries = function (datasource) {
-                    if (datasource.type !== 'clickhouse') {
-                        throw { message: 'Plugin CHTable is working only with ClickHouse datasource.' };
-                    }
                     this.pageIndex = 0;
                     this.datasource = datasource;
                     if (this.panel.transform === 'annotations') {
@@ -106,6 +104,9 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     return this._issueQueries(true);
                 };
                 TablePanelCtrl.prototype._rowsCount = function () {
+                    if (!this.datasource) {
+                        return Promise.resolve(0);
+                    }
                     var panel = this.panel;
                     if (panel.limit) {
                         return this.$q.when(this.panel.limit);
@@ -113,11 +114,15 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     if (panel.rowsCount !== null) {
                         return this.$q.when(panel.rowsCount);
                     }
-                    var q = panel.targets[0].rawQuery;
+                    var q = panel.targets[0].rawSql;
                     if (q === "" || q === undefined) {
                         return this.$q.when(0);
                     }
-                    q = "select count() from (" + this._rmLimit(q, true) + ")";
+                    q = this._rmWhere(q);
+                    q = this._rmOrder(q);
+                    q = this._rmOffset(q, false);
+                    q = this._rmLimit(q, false);
+                    q = "select count(*) from (" + q + ") as T";
                     return this.datasource.metricFindQuery(q).then(function (data) {
                         panel.rowsCount = data.length ? data[0].text : 0;
                         return panel.rowsCount;
@@ -132,6 +137,135 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     }
                     return query.slice(0, limitIndex) + query.slice(limitIndex + limit.length, q.length);
                 };
+                TablePanelCtrl.prototype._rmOffset = function (query, raw) {
+                    var q = query.toLowerCase();
+                    var offset = raw ? ('offset ' + this.getLimitStr()) : 'offset $__offset';
+                    var offsetIndex = q.indexOf(offset);
+                    if (offsetIndex === -1) {
+                        return query;
+                    }
+                    return query.slice(0, offsetIndex) + query.slice(offsetIndex + offset.length, q.length);
+                };
+                TablePanelCtrl.prototype._rmOrder = function (query) {
+                    var q = query.toLowerCase();
+                    var offset = 'order by $__order';
+                    var offsetIndex = q.indexOf(offset);
+                    if (offsetIndex === -1) {
+                        return query;
+                    }
+                    return query.slice(0, offsetIndex) + query.slice(offsetIndex + offset.length, q.length);
+                };
+                TablePanelCtrl.prototype._rmWhere = function (query) {
+                    var q = query.toLowerCase().replace(/(\r\n|\n|\r)/gm, " ");
+                    var result = '';
+                    var startIndex = q.indexOf('$__where');
+                    var endIndex = q.indexOf('order by') - 1;
+                    var itemStr = q.slice(startIndex, endIndex);
+                    if (!this.panel.filterableColumns) {
+                        result = ' where (true) ';
+                    }
+                    else if (itemStr.trim().toLowerCase() === '$__where') {
+                        if (this.currentFilter) {
+                            result = ' where ' + this._getColumnFilter();
+                        }
+                    }
+                    else {
+                        var andIndex = q.indexOf('and');
+                        if (andIndex !== -1) {
+                            endIndex = andIndex;
+                        }
+                        if (this.currentFilter) {
+                            result = ' where ' + this._getColumnFilter();
+                        }
+                        else {
+                            result = ' where (true) ';
+                        }
+                    }
+                    var finalQuery = query.replace(/(\r\n|\n|\r)/gm, " ");
+                    return finalQuery.slice(0, startIndex) + result + finalQuery.slice(endIndex, finalQuery.length);
+                };
+                TablePanelCtrl.prototype.getLimitStr = function () {
+                    return this.panel.pageSize;
+                };
+                TablePanelCtrl.prototype.getOffsetStr = function () {
+                    return this.pageIndex * this.panel.pageSize;
+                };
+                TablePanelCtrl.prototype.getOrderStr = function (orderIndex, desc) {
+                    if (orderIndex === null) {
+                        orderIndex = 0;
+                    }
+                    var query = this.panel.targets[0].rawSql;
+                    var q = query.toLowerCase().replace(/(\r\n|\n|\r)/gm, " ");
+                    var startIndex = q.indexOf('select ') + 'select '.length;
+                    var endIndex = q.indexOf('from') - 1;
+                    var itemStr = query.replace(/(\r\n|\n|\r)/gm, " ").slice(startIndex, endIndex);
+                    var items = itemStr.split(',');
+                    for (var index = 0; index < items.length; index++) {
+                        var element = items[index];
+                        var loweredElement = element.toLowerCase();
+                        var caseIndex = loweredElement.indexOf('case');
+                        if (caseIndex !== -1) {
+                            var aliasIndex = loweredElement.indexOf(' as ') + ' as '.length;
+                            var alias = element.slice(aliasIndex, element.length);
+                            items[index] = alias.trim();
+                        }
+                        else {
+                            items[index] = element.trim();
+                        }
+                    }
+                    var item = items[orderIndex];
+                    var result = item + ' ';
+                    if (desc) {
+                        result = result + 'DESC';
+                    }
+                    else {
+                        result = result + 'ASC';
+                    }
+                    return result;
+                };
+                TablePanelCtrl.prototype.getWhereStr = function () {
+                    var query = this.panel.targets[0].rawSql;
+                    var q = query.toLowerCase().replace(/(\r\n|\n|\r)/gm, " ");
+                    var startIndex = q.indexOf('$__where');
+                    var endIndex = q.indexOf('order by') - 1;
+                    var itemStr = query.replace(/(\r\n|\n|\r)/gm, " ").slice(startIndex, endIndex);
+                    var result = '';
+                    if (!this.panel.filterableColumns) {
+                        result = ' where (true) ';
+                        return result;
+                    }
+                    if (itemStr.trim().toLowerCase() === '$__where') {
+                        if (this.currentFilter) {
+                            result = ' where ' + this._getColumnFilter();
+                        }
+                    }
+                    else {
+                        if (this.currentFilter) {
+                            result = ' where ' + this._getColumnFilter();
+                        }
+                        else {
+                            result = ' where (true) ';
+                        }
+                    }
+                    return result;
+                };
+                TablePanelCtrl.prototype._getColumnFilter = function () {
+                    var _this = this;
+                    if (this.panel.filterableColumns) {
+                        var columns = this.panel.filterableColumns.split(',');
+                        var colStr = '';
+                        columns.forEach(function (col, index) {
+                            if (index !== 0) {
+                                colStr = colStr + ' or ';
+                            }
+                            colStr = colStr + col + " like '%" + _this.currentFilter + "%'";
+                        });
+                        return colStr;
+                    }
+                    else {
+                        return '';
+                    }
+                };
                 TablePanelCtrl.prototype._issueQueries = function (clearCache) {
                     if (clearCache === void 0) { clearCache = true; }
                     if (!this.panel.targets || this.panel.targets.length === 0) {
@@ -141,12 +275,17 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         this.pageCache = [];
                         this.panel.rowsCount = null;
                     }
+                    var orderIndex = this.panel.sort.col;
+                    var desc = this.panel.sort.desc;
                     // make shallow copy of scoped vars,
                     // and add built in variables interval and interval_ms
                     var scopedVars = Object.assign({}, this.panel.scopedVars, {
                         "__interval": { text: this.interval, value: this.interval },
                         "__interval_ms": { text: this.intervalMs, value: this.intervalMs },
                         "__limit": { value: this.getLimitStr() },
+                        "__offset": { value: this.getOffsetStr() },
+                        "__order": { value: this.getOrderStr(orderIndex, desc) },
+                        "__where": { value: this.getWhereStr() },
                     });
                     var metricsQuery = {
                         panelId: this.panel.id,
@@ -161,9 +300,6 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         cacheTimeout: this.panel.cacheTimeout
                     };
                     return this.datasource.query(metricsQuery);
-                };
-                TablePanelCtrl.prototype.getLimitStr = function () {
-                    return this.pageIndex * this.panel.pageSize + ',' + this.panel.pageSize;
                 };
                 TablePanelCtrl.prototype.onDataError = function (err) {
                     this.dataRaw = [];
@@ -196,6 +332,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     return _super.prototype.render.call(this, this.table);
                 };
                 TablePanelCtrl.prototype.toggleColumnSort = function (col, colIndex) {
+                    this.pageIndex = 0;
                     // remove sort flag from current column
                     if (this.table.columns[this.panel.sort.col]) {
                         this.table.columns[this.panel.sort.col].sort = false;
@@ -212,11 +349,12 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         this.panel.sort.col = colIndex;
                         this.panel.sort.desc = true;
                     }
-                    this.render();
+                    this.loadPage(true);
                 };
-                TablePanelCtrl.prototype.loadPage = function () {
+                TablePanelCtrl.prototype.loadPage = function (clearCache) {
+                    if (clearCache === void 0) { clearCache = false; }
                     var self = this;
-                    self._issueQueries(false).then(function (data) { self.handleQueryResult(data); });
+                    self._issueQueries(clearCache).then(function (data) { self.handleQueryResult(data); });
                 };
                 TablePanelCtrl.prototype.exportCsv = function () {
                     var scope = this.$scope.$new(true);
@@ -227,6 +365,11 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         scope: scope,
                         modalClass: 'modal--narrow'
                     });
+                };
+                TablePanelCtrl.prototype.search = function () {
+                    // var el = $(e.currentTarget);
+                    // this.currentFilter = el.val();
+                    this.loadPage(true);
                 };
                 TablePanelCtrl.prototype.link = function (scope, elem, attrs, ctrl) {
                     var data;
@@ -252,7 +395,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         var el = jquery_1.default(e.currentTarget);
                         ctrl.pageIndex = (parseInt(el.text(), 10) - 1);
                         if (ctrl.pageCache[ctrl.pageIndex] === undefined) {
-                            ctrl.loadPage();
+                            ctrl.loadPage(true);
                         }
                         else {
                             renderPanel();
@@ -277,6 +420,11 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                             footerElem.append(paginationList);
                         });
                     }
+                    // function search(e) {
+                    //   var el = $(e.currentTarget);
+                    //   ctrl.currentFilter = el.val();
+                    //   ctrl.loadPage(true);
+                    // }
                     function renderPanel() {
                         var panelElem = elem.parents('.panel');
                         var rootElem = elem.find('.table-panel-scroll');
@@ -302,6 +450,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         };
                         ctrl.variableSrv.setAdhocFilter(options);
                     }
+                    //elem.on('change', '.searchInput', search);
                     elem.on('click', '.table-panel-page-link', switchPage);
                     elem.on('click', '.table-panel-filter-link', addFilterClicked);
                     var unbindDestroy = scope.$on('$destroy', function () {

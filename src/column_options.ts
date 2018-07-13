@@ -15,6 +15,7 @@ export class ColumnOptionsCtrl {
   unitFormats: any;
   getColumnNames: any;
   activeStyleIndex: number;
+  mappingTypes: any;
 
   /** @ngInject */
   constructor($scope) {
@@ -45,6 +46,7 @@ export class ColumnOptionsCtrl {
       {text: 'MM/DD/YY h:mm:ss a', value: 'MM/DD/YY h:mm:ss a'},
       {text: 'MMMM D, YYYY LT',  value: 'MMMM D, YYYY LT'},
     ];
+    this.mappingTypes = [{ text: 'Value to text', value: 1 }, { text: 'Range to text', value: 2 }];
 
     this.getColumnNames = () => {
       if (!this.panelCtrl.table) {
@@ -58,7 +60,7 @@ export class ColumnOptionsCtrl {
     this.onColorChange = this.onColorChange.bind(this);
   }
 
-  render() {debugger
+  render() {
     this.panelCtrl.render();
   }
 
@@ -73,7 +75,7 @@ export class ColumnOptionsCtrl {
       type: 'number',
       alias: '',
       decimals: 2,
-      colors: ["rgba(245, 54, 54, 0.9)", "rgba(237, 129, 40, 0.89)", "rgba(50, 172, 45, 0.97)"],
+      colors: ['rgba(64, 64, 64, 0.9)', 'rgba(245, 54, 54, 0.9)', 'rgba(237, 129, 40, 0.89)', 'rgba(50, 172, 45, 0.97)'],
       colorMode: null,
       pattern: '',
       dateFormat: 'YYYY-MM-DD HH:mm:ss',
@@ -102,17 +104,43 @@ export class ColumnOptionsCtrl {
 
   invertColorOrder(index) {
     var ref = this.panel.styles[index].colors;
-    var copy = ref[0];
-    ref[0] = ref[2];
-    ref[2] = copy;
+
+    ref = ref.reverse();
     this.panelCtrl.render();
   }
 
-  onColorChange(styleIndex, colorIndex) {
+  onColorChange(colorIndex) {
     return (newColor) => {
+      var styleIndex = this.panel.styles.indexOf(this.panel.style);
       this.panel.styles[styleIndex].colors[colorIndex] = newColor;
       this.render();
     };
+  }
+
+  addValueMap(style) {
+    if (!style.valueMaps) {
+      style.valueMaps = [];
+    }
+    style.valueMaps.push({ value: '', text: '' });
+    this.panelCtrl.render();
+  }
+
+  removeValueMap(style, index) {
+    style.valueMaps.splice(index, 1);
+    this.panelCtrl.render();
+  }
+
+  addRangeMap(style) {
+    if (!style.rangeMaps) {
+      style.rangeMaps = [];
+    }
+    style.rangeMaps.push({ from: '', to: '', text: '' });
+    this.panelCtrl.render();
+  }
+
+  removeRangeMap(style, index) {
+    style.rangeMaps.splice(index, 1);
+    this.panelCtrl.render();
   }
 }
 
@@ -122,7 +150,7 @@ export function columnOptionsTab($q, uiSegmentSrv) {
   return {
     restrict: 'E',
     scope: true,
-    templateUrl: 'public/app/plugins/panel/table/column_options.html',
+    templateUrl: 'public/plugins/mysql_table/column_options.html',
     controller: ColumnOptionsCtrl,
   };
 }

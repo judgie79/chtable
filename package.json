@@ -1,12 +1,12 @@
 {
-    "name": "vertamedia-chtable",
+    "name": "mysql_table",
     "version": "1.0.0",
-    "description": "Table plugin for ClickHouse",
+    "description": "Table plugin for MySQL",
     "scripts": {
         "build": "grunt",
         "test": "./node_modules/karma/bin/karma start"
     },
-    "author": "Vertamedia",
+    "author": "Michael Richter",
     "license": "MIT",
     "dependencies": {
         "babel-plugin-transform-es2015-for-of": "^6.6.0",

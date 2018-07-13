@@ -11,6 +11,7 @@ export declare class ColumnOptionsCtrl {
     unitFormats: any;
     getColumnNames: any;
     activeStyleIndex: number;
+    mappingTypes: any;
     /** @ngInject */
     constructor($scope: any);
     render(): void;
@@ -18,7 +19,11 @@ export declare class ColumnOptionsCtrl {
     addColumnStyle(): void;
     removeColumnStyle(style: any): void;
     invertColorOrder(index: any): void;
-    onColorChange(styleIndex: any, colorIndex: any): (newColor: any) => void;
+    onColorChange(colorIndex: any): (newColor: any) => void;
+    addValueMap(style: any): void;
+    removeValueMap(style: any, index: any): void;
+    addRangeMap(style: any): void;
+    removeRangeMap(style: any, index: any): void;
 }
 /** @ngInject */
 export declare function columnOptionsTab($q: any, uiSegmentSrv: any): {

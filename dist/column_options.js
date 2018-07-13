@@ -8,7 +8,7 @@ System.register(['lodash', 'app/core/utils/kbn'], function(exports_1) {
         return {
             restrict: 'E',
             scope: true,
-            templateUrl: 'public/app/plugins/panel/table/column_options.html',
+            templateUrl: 'public/plugins/mysql_table/column_options.html',
             controller: ColumnOptionsCtrl,
         };
     }
@@ -52,6 +52,7 @@ System.register(['lodash', 'app/core/utils/kbn'], function(exports_1) {
                         { text: 'MM/DD/YY h:mm:ss a', value: 'MM/DD/YY h:mm:ss a' },
                         { text: 'MMMM D, YYYY LT', value: 'MMMM D, YYYY LT' },
                     ];
+                    this.mappingTypes = [{ text: 'Value to text', value: 1 }, { text: 'Range to text', value: 2 }];
                     this.getColumnNames = function () {
                         if (!_this.panelCtrl.table) {
                             return [];
@@ -63,7 +64,6 @@ System.register(['lodash', 'app/core/utils/kbn'], function(exports_1) {
                     this.onColorChange = this.onColorChange.bind(this);
                 }
                 ColumnOptionsCtrl.prototype.render = function () {
-                    debugger;
                     this.panelCtrl.render();
                 };
                 ColumnOptionsCtrl.prototype.setUnitFormat = function (column, subItem) {
@@ -76,7 +76,7 @@ System.register(['lodash', 'app/core/utils/kbn'], function(exports_1) {
                         type: 'number',
                         alias: '',
                         decimals: 2,
-                        colors: ["rgba(245, 54, 54, 0.9)", "rgba(237, 129, 40, 0.89)", "rgba(50, 172, 45, 0.97)"],
+                        colors: ['rgba(64, 64, 64, 0.9)', 'rgba(245, 54, 54, 0.9)', 'rgba(237, 129, 40, 0.89)', 'rgba(50, 172, 45, 0.97)'],
                         colorMode: null,
                         pattern: '',
                         dateFormat: 'YYYY-MM-DD HH:mm:ss',
@@ -100,17 +100,38 @@ System.register(['lodash', 'app/core/utils/kbn'], function(exports_1) {
                 };
                 ColumnOptionsCtrl.prototype.invertColorOrder = function (index) {
                     var ref = this.panel.styles[index].colors;
-                    var copy = ref[0];
-                    ref[0] = ref[2];
-                    ref[2] = copy;
+                    ref = ref.reverse();
                     this.panelCtrl.render();
                 };
-                ColumnOptionsCtrl.prototype.onColorChange = function (styleIndex, colorIndex) {
+                ColumnOptionsCtrl.prototype.onColorChange = function (colorIndex) {
                     var _this = this;
                     return function (newColor) {
+                        var styleIndex = _this.panel.styles.indexOf(_this.panel.style);
                         _this.panel.styles[styleIndex].colors[colorIndex] = newColor;
                         _this.render();
                     };
+                };
+                ColumnOptionsCtrl.prototype.addValueMap = function (style) {
+                    if (!style.valueMaps) {
+                        style.valueMaps = [];
+                    }
+                    style.valueMaps.push({ value: '', text: '' });
+                    this.panelCtrl.render();
+                };
+                ColumnOptionsCtrl.prototype.removeValueMap = function (style, index) {
+                    style.valueMaps.splice(index, 1);
+                    this.panelCtrl.render();
+                };
+                ColumnOptionsCtrl.prototype.addRangeMap = function (style) {
+                    if (!style.rangeMaps) {
+                        style.rangeMaps = [];
+                    }
+                    style.rangeMaps.push({ from: '', to: '', text: '' });
+                    this.panelCtrl.render();
+                };
+                ColumnOptionsCtrl.prototype.removeRangeMap = function (style, index) {
+                    style.rangeMaps.splice(index, 1);
+                    this.panelCtrl.render();
                 };
                 return ColumnOptionsCtrl;
             })();

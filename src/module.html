@@ -1,6 +1,13 @@
-
+<div class="">
+	<label class="gf-form--has-input-icon">
+		<input type="text" class="gf-form-input width-20 ng-pristine ng-valid ng-empty ng-touched" ng-model="ctrl.currentFilter" ng-blur="ctrl.search()" placeholder="Filter by name or type">
+		<i class="gf-form-input-icon fa fa-search" ng-click="ctrl.search()"></i>
+	</label>
+</div>
 <div class="table-panel-container">
-	<div class="table-panel-header-bg" ng-show="ctrl.table.rows.length"></div>
+	<div class="table-panel-header-bg" ng-show="ctrl.table.rows.length">
+
+	</div>
 	<div class="table-panel-scroll" ng-show="ctrl.table.rows.length">
 		<table class="table-panel-table">
 			<thead>
@@ -22,8 +29,9 @@
 	</div>
 </div>
 <div class="datapoints-warning" ng-show="ctrl.table.rows.length===0">
-	<span class="small" >
-		No data to show <tip>Nothing returned by data query</tip>
+	<span class="small">
+		No data to show
+		<tip>Nothing returned by data query</tip>
 	</span>
 </div>
 <div class="table-panel-footer">

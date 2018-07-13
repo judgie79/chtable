@@ -1,6 +1,6 @@
 # Table plugin for [ClickHouse datasource](https://github.com/Vertamedia/chproxy)
 
-CHTable is a modification of Grafana's [table plugin](https://grafana.com/plugins/table) with next features:
+MySQLTable is a modification of Grafana's [table plugin](https://grafana.com/plugins/table) with next features:
 * Real pagination - sending queries with `LIMIT` parameter based on page number
 * Query results caching for each page
 * Detecting of total rows amount to build paging
@@ -14,9 +14,9 @@ Restart Grafana, check plugins list at http://your.grafana.instance/plugins.
 ### How to use
 
 * Configure [ClickHouse datasource](https://github.com/Vertamedia/chproxy)
-* Add `CHTable` panel to dashboard:
+* Add `MySQLTable` panel to dashboard:
 ![select plugin](https://user-images.githubusercontent.com/2902918/33119689-6e1b65ee-cf78-11e7-9fd2-c83ca2e721b3.png)
-* Choose `ClickHouse` as `Data Source`:
+* Choose any `MySQL` as `Data Source`:
 ![select datasource](https://user-images.githubusercontent.com/2902918/33119686-6ddcace6-cf78-11e7-81b0-3caa302ac00a.png)
 * Type query into editor. For example:
 ```

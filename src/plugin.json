@@ -1,12 +1,12 @@
 {
   "type": "panel",
-  "name": "CHTable",
-  "id": "vertamedia-chtable",
+  "name": "MySQL Table",
+  "id": "mysql_table",
 
   "info": {
     "author": {
-      "name": "Vertamedia",
-      "url": "https://vertamedia.com/"
+      "name": "Michael Richter",
+      "url": "https://github.com/judgie79/"
 },
     "logos": {
       "small": "img/icn-table-panel.svg",
@@ -15,7 +15,7 @@
     "links": [
       {
         "name": "GitHub",
-        "url": "https://github.com/Vertamedia/chtable"
+        "url": "https://github.com/judgie79/grafana_mysql_table"
       }
     ],
     "version": "1.0.0"

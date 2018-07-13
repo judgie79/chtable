@@ -8,7 +8,7 @@ System.register(['lodash', './transformers'], function(exports_1) {
         return {
             restrict: 'E',
             scope: true,
-            templateUrl: 'public/plugins/vertamedia-chtable/editor.html',
+            templateUrl: 'public/plugins/mysql_table/editor.html',
             controller: TablePanelEditorCtrl,
         };
     }

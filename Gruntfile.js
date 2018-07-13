@@ -6,41 +6,41 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.initConfig({
-        clean: ["dist"],
+        clean: ["./dist"],
 
         copy: {
             dist_js: {
                 expand: true,
                 cwd: 'src',
                 src: ['**/*.ts', '**/*.js', '**/*.d.ts'],
-                dest: 'dist'
+                dest: './dist'
             },
             dist_html: {
                 expand: true,
                 flatten: true,
                 cwd: 'src',
                 src: ['*.html'],
-                dest: 'dist'
+                dest: './dist'
             },
             dist_css: {
                 expand: true,
                 flatten: true,
                 cwd: 'src/css',
                 src: ['*.css'],
-                dest: 'dist/css/'
+                dest: './dist/css/'
             },
             dist_img: {
                 expand: true,
                 flatten: true,
                 cwd: 'src/img',
                 src: ['*.*'],
-                dest: 'dist/img/'
+                dest: './dist/img/'
             },
             dist_statics: {
                 expand: true,
                 flatten: true,
                 src: ['src/plugin.json', 'LICENSE', 'README.md'],
-                dest: 'dist/'
+                dest: './dist/'
             }
         },
 
@@ -81,7 +81,7 @@ module.exports = function(grunt) {
         },
 
         watch: {
-            files: ['src/**/*.ts', 'src/**/*.js', 'src/**/*.html', 'src/**/*.css', 'src/img/*.*', 'src/plugin.json', 'README.md'],
+            files: ['!dist/**', 'src/**/*.ts', 'src/**/*.js', 'src/**/*.html', 'src/**/*.css', 'src/img/*.*', 'src/plugin.json', 'README.md'],
             tasks: ['default'],
             options: {
                 debounceDelay: 250
