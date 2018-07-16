@@ -1,11 +1,11 @@
-# Table plugin for [ClickHouse datasource](https://github.com/Vertamedia/chproxy)
+# Table plugin for [MySQL datasource]
 
 MySQLTable is a modification of Grafana's [table plugin](https://grafana.com/plugins/table) with next features:
 * Real pagination - sending queries with `LIMIT` parameter based on page number
 * Query results caching for each page
 * Detecting of total rows amount to build paging
 
-> Plugin works only with ClickHouse datasource
+> Plugin works only with MySQL datasource
 
 ### Quick start
 Copy files to your [Grafana plugin directory](http://docs.grafana.org/plugins/installation/#grafana-plugin-directory).
@@ -13,7 +13,7 @@ Restart Grafana, check plugins list at http://your.grafana.instance/plugins.
 
 ### How to use
 
-* Configure [ClickHouse datasource](https://github.com/Vertamedia/chproxy)
+* Configure [MySQL datasource](https://github.com/Vertamedia/chproxy)
 * Add `MySQLTable` panel to dashboard:
 ![select plugin](https://user-images.githubusercontent.com/2902918/33119689-6e1b65ee-cf78-11e7-9fd2-c83ca2e721b3.png)
 * Choose any `MySQL` as `Data Source`:
@@ -23,12 +23,19 @@ Restart Grafana, check plugins list at http://your.grafana.instance/plugins.
 SELECT
     number
 FROM system.numbers
+$__where
 LIMIT $__limit
+OFFSET $__offset
+ORDER BY $__order
 ```
-> Where `$__limit` - is a special macros replaced with `LIMIT N, M` construction.
+> Where `$__limit` - is a special macros replaced with ` LIMIT N` construction.
+>> N = rows_per_page
+
+> Where `$__offset` - is a special macros replaced with ` OFFSET N` construction.
 >> N = (current_page-1) * rows_per_page
 
->> M = rows_per_page
+> Where `$__order` - is a special macros replaced with ` ORDER BY N` construction.
+
 * Set `Format as` to `Table` option
 * Go to `Options` tab and set params `Rows per page=10` and `Limit=50`:
 ![options](https://user-images.githubusercontent.com/2902918/33119688-6dfeaf8a-cf78-11e7-86e8-9b147a406efc.png)
@@ -44,4 +51,4 @@ If you don't want plugin to send extra query - set some value (like 1000)
 
 License
 -------
-MIT License, please see [LICENSE](https://github.com/Vertamedia/clickhouse-grafana/blob/master/LICENSE) for details.
+MIT License, please see [LICENSE](https://github.com/Vertamedia/MySQL-grafana/blob/master/LICENSE) for details.
