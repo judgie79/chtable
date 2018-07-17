@@ -201,16 +201,21 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     var itemStr = query.replace(/(\r\n|\n|\r)/gm, " ").slice(startIndex, endIndex);
                     var items = itemStr.split(',');
                     for (var index = 0; index < items.length; index++) {
-                        var element = items[index];
+                        var element = items[index].trim();
                         var loweredElement = element.toLowerCase();
                         var caseIndex = loweredElement.indexOf('case');
+                        var aliasIndex = loweredElement.indexOf(' as ');
+                        var aliasStartIndex = aliasIndex + ' as '.length;
                         if (caseIndex !== -1) {
-                            var aliasIndex = loweredElement.indexOf(' as ') + ' as '.length;
-                            var alias = element.slice(aliasIndex, element.length);
-                            items[index] = alias.trim();
+                            var alias = element.slice(aliasStartIndex, element.length);
+                            items[index] = alias;
+                        }
+                        else if (aliasIndex !== -1) {
+                            var alias = element.slice(aliasStartIndex, element.length);
+                            items[index] = alias;
                         }
                         else {
-                            items[index] = element.trim();
+                            items[index] = element;
                         }
                     }
                     var item = items[orderIndex];

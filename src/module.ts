@@ -225,15 +225,20 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     let items = itemStr.split(',');
 
     for (let index = 0; index < items.length; index++) {
-      let element = items[index];
+      let element = items[index].trim();
       let loweredElement = element.toLowerCase();
       let caseIndex = loweredElement.indexOf('case');
+      let aliasIndex = loweredElement.indexOf(' as ');
+      let aliasStartIndex = aliasIndex + ' as '.length;
+
       if (caseIndex !== -1) {
-        let aliasIndex = loweredElement.indexOf(' as ') + ' as '.length;
-        let alias = element.slice(aliasIndex, element.length);
-        items[index] = alias.trim();
+        let alias = element.slice(aliasStartIndex, element.length);
+        items[index] = alias;
+      } else if (aliasIndex !== -1) {
+        let alias = element.slice(aliasStartIndex, element.length);
+        items[index] = alias;
       } else {
-        items[index] = element.trim();
+        items[index] = element;
       }
     }
 
