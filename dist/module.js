@@ -159,7 +159,15 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     var q = query.toLowerCase().replace(/(\r\n|\n|\r)/gm, " ");
                     var result = '';
                     var startIndex = q.indexOf('$__where');
-                    var endIndex = q.indexOf('order by') - 1;
+                    var endIndex;
+                    var orderByIndex = q.indexOf('order by') - 1;
+                    var groupByIndex = q.indexOf('group by') - 1;
+                    if (groupByIndex !== -1) {
+                        endIndex = orderByIndex < groupByIndex ? orderByIndex : groupByIndex;
+                    }
+                    else {
+                        endIndex = orderByIndex;
+                    }
                     var itemStr = q.slice(startIndex, endIndex);
                     if (!this.panel.filterableColumns) {
                         result = ' where (true) ';
@@ -255,15 +263,20 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     return result;
                 };
                 TablePanelCtrl.prototype._getColumnFilter = function () {
-                    var _this = this;
                     if (this.panel.filterableColumns) {
                         var columns = this.panel.filterableColumns.split(',');
                         var colStr = '';
+                        var searchParams = this.currentFilter.split(' ');
                         columns.forEach(function (col, index) {
                             if (index !== 0) {
                                 colStr = colStr + ' or ';
                             }
-                            colStr = colStr + col + " like '%" + _this.currentFilter + "%'";
+                            searchParams.forEach(function (param, paramIndex) {
+                                if (paramIndex !== 0) {
+                                    colStr = colStr + ' or ';
+                                }
+                                colStr = colStr + col + " like '%" + param.trim() + "%'";
+                            });
                         });
                         return colStr;
                     }

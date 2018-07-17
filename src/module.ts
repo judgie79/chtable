@@ -170,7 +170,15 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     let result = '';
 
     let startIndex = q.indexOf('$__where');
-    let endIndex = q.indexOf('order by') - 1;
+    let endIndex;
+    let orderByIndex = q.indexOf('order by') - 1;
+    let groupByIndex = q.indexOf('group by') - 1;
+
+    if (groupByIndex !== -1) {
+      endIndex = orderByIndex < groupByIndex ? orderByIndex : groupByIndex;
+    } else {
+      endIndex = orderByIndex;
+    }
 
     let itemStr = q.slice(startIndex, endIndex);
 
@@ -291,12 +299,20 @@ class TablePanelCtrl extends MetricsPanelCtrl {
 
 
       let colStr = '';
+      let searchParams = this.currentFilter.split(' ');
       columns.forEach((col, index) => {
 
         if (index !== 0) {
           colStr = colStr + ' or ';
         }
-        colStr = colStr + col + " like '%" + this.currentFilter + "%'";
+
+        searchParams.forEach((param, paramIndex) => {
+          if (paramIndex !== 0) {
+            colStr = colStr + ' or ';
+          }
+
+          colStr = colStr + col + " like '%" + param.trim() + "%'";
+        });
       });
 
       return colStr;
