@@ -70,7 +70,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     this.events.on('data-error', this.onDataError.bind(this));
     this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
     this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
-    this.events.on('init-panel-actions', this.onInitPanelActions.bind(this));
+    this.events.on('init-panel-actions', TablePanelCtrl.onInitPanelActions.bind(this));
   }
 
   onInitEditMode() {
@@ -78,14 +78,14 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     this.addEditorTab('Column Styles', columnOptionsTab, 3);
   }
 
-  onInitPanelActions(actions) {
+  static onInitPanelActions(actions) {
     actions.push({ text: 'Export CSV', click: 'ctrl.exportCsv()' });
   }
 
-  issueQueries(datasource) {
+  issueQueries(dataSource) {
 
     this.pageIndex = 0;
-    this.datasource = datasource;
+    this.datasource = dataSource;
 
     if (this.panel.transform === 'annotations') {
       this.setTimeQueryStart();
@@ -119,7 +119,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     }
 
     q = this._rmWhere(q);
-    q = this._rmOrder(q);
+    q = TablePanelCtrl._rmOrder(q);
     q = this._rmOffset(q, false);
     q = this._rmLimit(q, false);
 
@@ -153,7 +153,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     return query.slice(0, offsetIndex) + query.slice(offsetIndex + offset.length, q.length);
   }
 
-  _rmOrder(query) {
+  static _rmOrder(query) {
     let q = query.toLowerCase();
     let offset = 'order by $__order';
     let offsetIndex = q.indexOf(offset);
@@ -186,6 +186,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
       result = ' where (true) ';
 
     } else if (itemStr.trim().toLowerCase() === '$__where') {
+
       if (this.currentFilter) {
         result = ' where ' + this._getColumnFilter();
       }
@@ -240,11 +241,9 @@ class TablePanelCtrl extends MetricsPanelCtrl {
       let aliasStartIndex = aliasIndex + ' as '.length;
 
       if (caseIndex !== -1) {
-        let alias = element.slice(aliasStartIndex, element.length);
-        items[index] = alias;
+        items[index] = element.slice(aliasStartIndex, element.length);
       } else if (aliasIndex !== -1) {
-        let alias = element.slice(aliasStartIndex, element.length);
-        items[index] = alias;
+        items[index] = element.slice(aliasStartIndex, element.length);
       } else {
         items[index] = element;
       }
