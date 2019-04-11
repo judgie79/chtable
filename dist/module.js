@@ -82,18 +82,18 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     this.events.on('data-error', this.onDataError.bind(this));
                     this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
                     this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
-                    this.events.on('init-panel-actions', this.onInitPanelActions.bind(this));
+                    this.events.on('init-panel-actions', TablePanelCtrl.onInitPanelActions.bind(this));
                 }
                 TablePanelCtrl.prototype.onInitEditMode = function () {
                     this.addEditorTab('Options', editor_1.tablePanelEditor, 2);
                     this.addEditorTab('Column Styles', column_options_1.columnOptionsTab, 3);
                 };
-                TablePanelCtrl.prototype.onInitPanelActions = function (actions) {
+                TablePanelCtrl.onInitPanelActions = function (actions) {
                     actions.push({ text: 'Export CSV', click: 'ctrl.exportCsv()' });
                 };
-                TablePanelCtrl.prototype.issueQueries = function (datasource) {
+                TablePanelCtrl.prototype.issueQueries = function (dataSource) {
                     this.pageIndex = 0;
-                    this.datasource = datasource;
+                    this.datasource = dataSource;
                     if (this.panel.transform === 'annotations') {
                         this.setTimeQueryStart();
                         return this.annotationsSrv.getAnnotations({ dashboard: this.dashboard, panel: this.panel, range: this.range })
@@ -119,7 +119,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         return this.$q.when(0);
                     }
                     q = this._rmWhere(q);
-                    q = this._rmOrder(q);
+                    q = TablePanelCtrl._rmOrder(q);
                     q = this._rmOffset(q, false);
                     q = this._rmLimit(q, false);
                     q = "select count(*) from (" + q + ") as T";
@@ -146,7 +146,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     }
                     return query.slice(0, offsetIndex) + query.slice(offsetIndex + offset.length, q.length);
                 };
-                TablePanelCtrl.prototype._rmOrder = function (query) {
+                TablePanelCtrl._rmOrder = function (query) {
                     var q = query.toLowerCase();
                     var offset = 'order by $__order';
                     var offsetIndex = q.indexOf(offset);
@@ -215,12 +215,10 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                         var aliasIndex = loweredElement.indexOf(' as ');
                         var aliasStartIndex = aliasIndex + ' as '.length;
                         if (caseIndex !== -1) {
-                            var alias = element.slice(aliasStartIndex, element.length);
-                            items[index] = alias;
+                            items[index] = element.slice(aliasStartIndex, element.length);
                         }
                         else if (aliasIndex !== -1) {
-                            var alias = element.slice(aliasStartIndex, element.length);
-                            items[index] = alias;
+                            items[index] = element.slice(aliasStartIndex, element.length);
                         }
                         else {
                             items[index] = element;
@@ -275,7 +273,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                                 if (paramIndex !== 0) {
                                     colStr = colStr + ' or ';
                                 }
-                                colStr = colStr + col + " like '%" + param.trim() + "%'";
+                                colStr = colStr + col + (" like \"%" + param.trim() + "%\"");
                             });
                         });
                         return colStr;
@@ -319,7 +317,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     };
                     return this.datasource.query(metricsQuery);
                 };
-                TablePanelCtrl.prototype.onDataError = function (err) {
+                TablePanelCtrl.prototype.onDataError = function () {
                     this.dataRaw = [];
                     this.render();
                 };
@@ -438,11 +436,6 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                             footerElem.append(paginationList);
                         });
                     }
-                    // function search(e) {
-                    //   var el = $(e.currentTarget);
-                    //   ctrl.currentFilter = el.val();
-                    //   ctrl.loadPage(true);
-                    // }
                     function renderPanel() {
                         var panelElem = elem.parents('.panel');
                         var rootElem = elem.find('.table-panel-scroll');

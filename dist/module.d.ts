@@ -45,12 +45,12 @@ declare class TablePanelCtrl extends MetricsPanelCtrl {
     /** @ngInject */
     constructor($scope: any, $injector: any, templateSrv: any, annotationsSrv: any, $sanitize: any, variableSrv: any);
     onInitEditMode(): void;
-    onInitPanelActions(actions: any): void;
-    issueQueries(datasource: any): any;
+    static onInitPanelActions(actions: any): void;
+    issueQueries(dataSource: any): any;
     _rowsCount(): any;
     _rmLimit(query: any, raw: any): any;
     _rmOffset(query: any, raw: any): any;
-    _rmOrder(query: any): any;
+    static _rmOrder(query: any): any;
     _rmWhere(query: any): string;
     getLimitStr(): any;
     getOffsetStr(): number;
@@ -58,7 +58,7 @@ declare class TablePanelCtrl extends MetricsPanelCtrl {
     getWhereStr(): string;
     _getColumnFilter(): string;
     _issueQueries(clearCache?: boolean): any;
-    onDataError(err: any): void;
+    onDataError(): void;
     onDataReceived(dataList: any): void;
     render(): void;
     toggleColumnSort(col: any, colIndex: any): void;
