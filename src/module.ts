@@ -310,7 +310,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
             colStr = colStr + ' or ';
           }
 
-          colStr = colStr + col + " like '%" + param.trim() + "%'";
+          colStr = colStr + col + ` like "%${param.trim()}%"`;
         });
       });
 
