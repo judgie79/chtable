@@ -359,7 +359,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     return this.datasource.query(metricsQuery);
   }
 
-  onDataError(err) {
+  onDataError() {
     this.dataRaw = [];
     this.render();
   }
@@ -421,7 +421,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
   }
 
   exportCsv() {
-    var scope = this.$scope.$new(true);
+    const scope = this.$scope.$new(true);
     scope.tableData = this.renderer.render_values();
     scope.panel = 'table';
     this.publishAppEvent('show-modal', {
@@ -439,12 +439,12 @@ class TablePanelCtrl extends MetricsPanelCtrl {
   }
 
   link(scope, elem, attrs, ctrl: TablePanelCtrl) {
-    var data;
-    var panel = ctrl.panel;
-    var pageCount = 0;
+    let data;
+    const panel = ctrl.panel;
+    let pageCount = 0;
 
     function getTableHeight() {
-      var panelHeight = ctrl.height;
+      let panelHeight = ctrl.height;
 
       if (pageCount > 1) {
         panelHeight -= 26;
@@ -464,7 +464,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     }
 
     function switchPage(e) {
-      var el = $(e.currentTarget);
+      const el = $(e.currentTarget);
       ctrl.pageIndex = (parseInt(el.text(), 10) - 1);
       if (ctrl.pageCache[ctrl.pageIndex] === undefined) {
         ctrl.loadPage(true);
@@ -477,20 +477,20 @@ class TablePanelCtrl extends MetricsPanelCtrl {
       ctrl._rowsCount().then(rows => {
         footerElem.empty();
 
-        var pageSize = panel.pageSize || 100;
+        const pageSize = panel.pageSize || 100;
         pageCount = Math.ceil(rows / pageSize);
         if (pageCount === 1) {
           return;
         }
 
-        var startPage = Math.max(ctrl.pageIndex - 3, 0);
-        var endPage = Math.min(pageCount, startPage + 9);
+        const startPage = Math.max(ctrl.pageIndex - 3, 0);
+        const endPage = Math.min(pageCount, startPage + 9);
 
-        var paginationList = $('<ul></ul>');
+        const paginationList = $('<ul></ul>');
 
-        for (var i = startPage; i < endPage; i++) {
-          var activeClass = i === ctrl.pageIndex ? 'active' : '';
-          var pageLinkElem = $('<li><a class="table-panel-page-link pointer ' + activeClass + '">' + (i + 1) + '</a></li>');
+        for (let i = startPage; i < endPage; i++) {
+          const activeClass = i === ctrl.pageIndex ? 'active' : '';
+          const pageLinkElem = $('<li><a class="table-panel-page-link pointer ' + activeClass + '">' + (i + 1) + '</a></li>');
           paginationList.append(pageLinkElem);
         }
 
@@ -498,18 +498,11 @@ class TablePanelCtrl extends MetricsPanelCtrl {
       });
     }
 
-    // function search(e) {
-    //   var el = $(e.currentTarget);
-
-    //   ctrl.currentFilter = el.val();
-    //   ctrl.loadPage(true);
-    // }
-
     function renderPanel() {
-      var panelElem = elem.parents('.panel');
-      var rootElem = elem.find('.table-panel-scroll');
-      var tbodyElem = elem.find('tbody');
-      var footerElem = elem.find('.table-panel-footer');
+      const panelElem = elem.parents('.panel');
+      const rootElem = elem.find('.table-panel-scroll');
+      const tbodyElem = elem.find('tbody');
+      const footerElem = elem.find('.table-panel-footer');
 
       elem.css({ 'font-size': panel.fontSize });
       panelElem.addClass('table-panel-wrapper');
@@ -527,7 +520,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
 
     function addFilterClicked(e) {
       let filterData = $(e.currentTarget).data();
-      var options = {
+      const options = {
         datasource: panel.datasource,
         key: data.columns[filterData.column].text,
         value: data.rows[filterData.row][filterData.column],
@@ -542,7 +535,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     elem.on('click', '.table-panel-page-link', switchPage);
     elem.on('click', '.table-panel-filter-link', addFilterClicked);
 
-    var unbindDestroy = scope.$on('$destroy', function () {
+    const unbindDestroy = scope.$on('$destroy', function () {
       elem.off('click', '.table-panel-page-link');
       elem.off('click', '.table-panel-filter-link');
       unbindDestroy();
