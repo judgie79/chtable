@@ -188,7 +188,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
     } else if (itemStr.trim().toLowerCase() === '$__where') {
 
       if (this.currentFilter) {
-        result = ' where ' + this._getColumnFilter();
+        result = ' where (' + this._getColumnFilter() + ')';
       }
     } else {
 
@@ -199,7 +199,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
       }
 
       if (this.currentFilter) {
-        result = ' where ' + this._getColumnFilter();
+        result = ' where (' + this._getColumnFilter() + ')';
       } else {
         result = ' where (true) ';
       }
@@ -278,12 +278,12 @@ class TablePanelCtrl extends MetricsPanelCtrl {
 
     if (itemStr.trim().toLowerCase() === '$__where') {
       if (this.currentFilter) {
-        result = ' where ' + this._getColumnFilter();
+        result = ' where (' + this._getColumnFilter() + ')';
       }
     } else {
 
       if (this.currentFilter) {
-        result = ' where ' + this._getColumnFilter();
+        result = ' where (' + this._getColumnFilter()+ ')';
       } else {
         result = ' where (true) ';
       }

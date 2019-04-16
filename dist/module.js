@@ -174,7 +174,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     }
                     else if (itemStr.trim().toLowerCase() === '$__where') {
                         if (this.currentFilter) {
-                            result = ' where ' + this._getColumnFilter();
+                            result = ' where (' + this._getColumnFilter() + ')';
                         }
                     }
                     else {
@@ -183,7 +183,7 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                             endIndex = andIndex;
                         }
                         if (this.currentFilter) {
-                            result = ' where ' + this._getColumnFilter();
+                            result = ' where (' + this._getColumnFilter() + ')';
                         }
                         else {
                             result = ' where (true) ';
@@ -247,12 +247,12 @@ System.register(['lodash', 'jquery', 'app/plugins/sdk', './transformers', './edi
                     }
                     if (itemStr.trim().toLowerCase() === '$__where') {
                         if (this.currentFilter) {
-                            result = ' where ' + this._getColumnFilter();
+                            result = ' where (' + this._getColumnFilter() + ')';
                         }
                     }
                     else {
                         if (this.currentFilter) {
-                            result = ' where ' + this._getColumnFilter();
+                            result = ' where (' + this._getColumnFilter() + ')';
                         }
                         else {
                             result = ' where (true) ';
